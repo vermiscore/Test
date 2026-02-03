@@ -8,8 +8,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Math & Physics App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
     * {
@@ -592,10 +593,15 @@
 
     // Initialize Google APIs
     function gapiLoaded() {
-        gapi.load('picker', () => {
-            pickerInited = true;
-            console.log('Picker API loaded');
-        });
+        gapi.load('client:picker', initializePicker);
+    }
+
+    function initializePicker() {
+        gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest')
+            .then(() => {
+                pickerInited = true;
+                console.log('Picker API loaded');
+            });
     }
 
     function gisLoaded() {
@@ -949,15 +955,6 @@
     document.getElementById('btnWrong').addEventListener('click', markWrong);
     document.getElementById('btnHome').addEventListener('click', () => switchPanel('home'));
     document.getElementById('backBtn').addEventListener('click', () => switchPanel('home'));
-
-    window.addEventListener('load', () => {
-        if (typeof gapi !== 'undefined') {
-            gapiLoaded();
-        }
-        if (typeof google !== 'undefined' && google.accounts) {
-            gisLoaded();
-        }
-    });
 
     loadVocabulary();
     loadProgress();
