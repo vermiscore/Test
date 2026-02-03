@@ -8,8 +8,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Math & Physics App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
 
 <style>
     * {
@@ -185,24 +183,21 @@
     .upload-button {
         background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
         color: white;
-        padding: 14px 32px;
-        border-radius: 12px;
-        font-size: 16px;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 14px;
         font-weight: 600;
         cursor: pointer;
         display: inline-block;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 16px rgba(61, 168, 117, 0.3);
+        transition: transform 0.2s;
     }
 
     .upload-button:hover {
-        background: linear-gradient(135deg, #66d9a8 0%, #52c997 100%);
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(61, 168, 117, 0.4);
     }
 
     .upload-button:active {
-        transform: translateY(0);
+        transform: scale(0.98);
     }
 
     input[type="file"] {
@@ -487,7 +482,7 @@
 
         <div class="upload-box">
             <div class="file-input-wrapper">
-                <div class="upload-button" id="uploadButton">📁 Select File</div>
+                <div class="upload-button">📁 Select File</div>
                 <input type="file" id="fileInput" accept=".xlsx, .xls">
             </div>
             <div class="file-name" id="fileName"></div>
@@ -530,16 +525,6 @@
 ```
 
 <script>
-    // Google API Configuration
-    const CLIENT_ID = "601060783093-tgptd20ntvutjccv572qaeflv03o9sa0.apps.googleusercontent.com";
-    const API_KEY = "AIzaSyCh_DOXRrH0S68ELv-DVWtrzyFTKS80gjI";
-    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
-
-    let tokenClient;
-    let accessToken = null;
-    let pickerInited = false;
-    let gisInited = false;
-
     // Default sample problem data
     let allWords = [
         { word: "2 + 3 = ?", answer: "5", calculationProcess: "2 + 3 = 5" },
@@ -561,109 +546,6 @@
         currentWordIdx: -1,
         xOnlyMode: false
     };
-
-    // Initialize Google APIs
-    function gapiLoaded() {
-        gapi.load('client:picker', initializePicker);
-    }
-
-    function initializePicker() {
-        gapi.client.load('https://www.googleapis.com/discovery/v1/apis/drive/v3/rest')
-            .then(() => {
-                pickerInited = true;
-                console.log('Picker API loaded');
-            });
-    }
-
-    function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: CLIENT_ID,
-            scope: SCOPES,
-            callback: '',
-        });
-        gisInited = true;
-        console.log('GIS loaded');
-    }
-
-    function openDrivePicker() {
-        if (!pickerInited || !gisInited) {
-            document.getElementById('importStatus').textContent = 'Google services are still loading... Please wait.';
-            return;
-        }
-
-        const showPicker = () => {
-            const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
-                .setIncludeFolders(true)
-                .setMimeTypes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel');
-
-            const picker = new google.picker.PickerBuilder()
-                .addView(view)
-                .setOAuthToken(accessToken)
-                .setDeveloperKey(API_KEY)
-                .setCallback(pickerCallback)
-                .setOrigin(window.location.protocol + '//' + window.location.host)
-                .build();
-            picker.setVisible(true);
-        };
-
-        tokenClient.callback = async (response) => {
-            if (response.error !== undefined) {
-                document.getElementById('importStatus').textContent = 'Authentication failed: ' + response.error;
-                return;
-            }
-            accessToken = response.access_token;
-            showPicker();
-        };
-
-        if (accessToken === null) {
-            tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            tokenClient.requestAccessToken({ prompt: '' });
-        }
-    }
-
-    async function pickerCallback(data) {
-        if (data.action === google.picker.Action.PICKED) {
-            const fileId = data.docs[0].id;
-            const fileName = data.docs[0].name;
-
-            document.getElementById('importStatus').textContent = `Loading ${fileName}...`;
-            document.getElementById('fileName').textContent = `Selected: ${fileName}`;
-
-            try {
-                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to download file from Google Drive');
-                }
-
-                const blob = await response.blob();
-                const arrayBuffer = await blob.arrayBuffer();
-                const data = new Uint8Array(arrayBuffer);
-                workbook = XLSX.read(data, { type: 'array' });
-
-                const selector = document.getElementById('sheetSelector');
-                selector.innerHTML = '<option value="">Select a sheet...</option>';
-                workbook.SheetNames.forEach(name => {
-                    const option = document.createElement('option');
-                    option.value = name;
-                    option.textContent = name;
-                    selector.appendChild(option);
-                });
-
-                selector.style.display = 'block';
-                document.getElementById('importBtn').style.display = 'block';
-                document.getElementById('importStatus').textContent = `✓ File loaded from Google Drive. Select a sheet to import.`;
-            } catch (error) {
-                document.getElementById('importStatus').textContent = '✗ Error: ' + error.message;
-                console.error('Error loading file:', error);
-            }
-        }
-    }
 
     function loadVocabulary() {
         const saved = localStorage.getItem('mathPhysicsData');
@@ -695,30 +577,20 @@
         }));
     }
 
-    // Upload button click handler
-    document.getElementById('uploadButton').addEventListener('click', function() {
-        // Check if Google Picker is available
-        if (pickerInited && gisInited) {
-            // Show options: Google Drive or Local File
-            const useGoogleDrive = confirm('Choose file source:\n\nOK = Google Drive\nCancel = Local File');
-            
-            if (useGoogleDrive) {
-                openDrivePicker();
-            } else {
-                document.getElementById('fileInput').click();
-            }
-        } else {
-            // If Google APIs not loaded, just use local file
-            document.getElementById('fileInput').click();
-        }
-    });
+    // Get DOM elements
+    const fileInput = document.getElementById('fileInput');
+    const uploadButton = document.querySelector('.upload-button');
+    const fileName = document.getElementById('fileName');
 
-    // Handle local file selection
-    document.getElementById('fileInput').addEventListener('change', function (e) {
+    // Upload button click handler - exactly like FFT code
+    uploadButton.addEventListener('click', () => fileInput.click());
+
+    // Handle local file selection - exactly like FFT code
+    fileInput.addEventListener('change', function (e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+        fileName.textContent = `Selected: ${file.name}`;
 
         const reader = new FileReader();
         reader.onload = function (e) {
