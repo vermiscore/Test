@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Math & Physics App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0d3b2f 0%, #1a5c47 50%, #0d3b2f 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .app-container {
+        width: 100%;
+        max-width: 520px;
+        min-height: 640px;
+        background: linear-gradient(135deg, #1e5a45 0%, #2d7a5f 100%);
+        position: relative;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .panel {
+        width: 100%;
+        min-height: 640px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: none;
+        padding: 30px;
+    }
+
+    .panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .btn {
+        background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(61, 168, 117, 0.3);
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        touch-action: manipulation;
+        letter-spacing: 0.5px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn:hover {
+        background: linear-gradient(135deg, #66d9a8 0%, #52c997 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(61, 168, 117, 0.4);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(61, 168, 117, 0.3);
+    }
+
+    @media (hover: none) {
+        .btn:hover {
+            transform: none;
+        }
+    }
+
+    /* Home Panel */
+    #homeTitle {
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #e8f8f2;
+        font-size: 32px;
+        font-weight: 800;
+        text-align: center;
+        margin: 0;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        letter-spacing: 1px;
+    }
+
+    .home-btn {
+        width: 200px;
+        height: 56px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+    }
+
+    #btnStart {
+        top: 180px;
+    }
+
+    #btnReset {
+        top: 256px;
+    }
+
+    #btnXOnly {
+        top: 332px;
+    }
+
+    #btnImport {
+        top: 408px;
+    }
+
+    /* Import Panel */
+    .import-header {
+        text-align: center;
+        color: #e8f8f2;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 30px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .import-section {
+        background: rgba(13, 59, 47, 0.4);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 2px solid rgba(82, 201, 151, 0.2);
+    }
+
+    .section-title {
+        color: #b8e6d5;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    #driveBtn {
+        display: block;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 280px;
+        height: 56px;
+        font-size: 16px;
+    }
+
+    .or-divider {
+        text-align: center;
+        color: #b8e6d5;
+        margin: 24px 0;
+        font-weight: 600;
+        font-size: 14px;
+        letter-spacing: 2px;
+        position: relative;
+    }
+
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 35%;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #52c997, transparent);
+    }
+
+    .or-divider::before {
+        left: 0;
+    }
+
+    .or-divider::after {
+        right: 0;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    #fileInput {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        border: 2px dashed #52c997;
+        background: rgba(13, 59, 47, 0.6);
+        color: #e8f8f2;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    #fileInput:hover {
+        border-color: #66d9a8;
+        background: rgba(13, 59, 47, 0.8);
+    }
+
+    #sheetSelector {
+        width: 100%;
+        max-width: 280px;
+        padding: 14px;
+        margin: 20px auto;
+        display: none;
+        font-size: 16px;
+        background: rgba(13, 59, 47, 0.8);
+        color: #e8f8f2;
+        border: 2px solid #52c997;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    #sheetSelector option {
+        background: #1a5c47;
+        color: #e8f8f2;
+    }
+
+    #importBtn {
+        display: none;
+        margin: 20px auto;
+        width: 200px;
+        height: 50px;
+    }
+
+    #backBtn {
+        display: block;
+        margin: 30px auto 0;
+        width: 160px;
+        height: 48px;
+        background: linear-gradient(135deg, #34705a 0%, #2d5f4d 100%);
+    }
+
+    #backBtn:hover {
+        background: linear-gradient(135deg, #3d8568 0%, #34705a 100%);
+    }
+
+    #importStatus {
+        text-align: center;
+        margin-top: 20px;
+        color: #b8e6d5;
+        font-weight: 600;
+        font-size: 14px;
+        min-height: 24px;
+        padding: 8px;
+        border-radius: 8px;
+        background: rgba(82, 201, 151, 0.1);
+    }
+
+    /* Quiz Panel */
+    #wordLabel {
+        position: absolute;
+        top: 30px;
+        left: 30px;
+        right: 30px;
+        max-height: 100px;
+        overflow-y: auto;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        color: #e8f8f2;
+        padding: 16px;
+        background: rgba(13, 59, 47, 0.5);
+        border-radius: 12px;
+        border: 2px solid rgba(82, 201, 151, 0.3);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    .input-container {
+        position: absolute;
+        top: 150px;
+        left: 30px;
+        right: 30px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    .input-label {
+        display: block;
+        color: #b8e6d5;
+        font-size: 14px;
+        margin-bottom: 8px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #52c997;
+        border-radius: 12px;
+        font-size: 16px;
+        background: rgba(13, 59, 47, 0.6);
+        color: #e8f8f2;
+        resize: vertical;
+        -webkit-appearance: none;
+        appearance: none;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: #66d9a8;
+        background: rgba(13, 59, 47, 0.8);
+        box-shadow: 0 0 0 4px rgba(82, 201, 151, 0.1);
+    }
+
+    .input-field::placeholder {
+        color: #7fb8a3;
+        opacity: 0.7;
+    }
+
+    textarea.input-field {
+        min-height: 60px;
+    }
+
+    #infoLabel {
+        position: absolute;
+        top: 400px;
+        left: 30px;
+        right: 30px;
+        max-height: 100px;
+        overflow-y: auto;
+        font-size: 14px;
+        text-align: left;
+        color: #b8e6d5;
+        white-space: pre-line;
+        padding: 16px;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        background: rgba(13, 59, 47, 0.6);
+        border-radius: 12px;
+        border: 2px solid rgba(82, 201, 151, 0.3);
+    }
+
+    #checkResult {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 480px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        padding: 16px 20px;
+        border-radius: 16px;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+    }
+
+    #checkResult.correct {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.95) 0%, rgba(56, 142, 60, 0.95) 100%);
+        color: white;
+        border: 2px solid #66bb6a;
+        animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #checkResult.incorrect {
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.95) 0%, rgba(211, 47, 47, 0.95) 100%);
+        color: white;
+        border: 2px solid #ef5350;
+        animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateX(-50%) translateY(-100px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .quiz-btn {
+        height: 48px;
+        position: absolute;
+        font-size: 16px;
+    }
+
+    #btnCheck {
+        top: 340px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 50px;
+    }
+
+    #btnCorrect {
+        top: 520px;
+        left: 50%;
+        transform: translateX(-100px);
+        width: 85px;
+    }
+
+    #btnWrong {
+        top: 520px;
+        left: 50%;
+        transform: translateX(15px);
+        width: 85px;
+    }
+
+    #btnNext {
+        top: 580px;
+        left: 50%;
+        transform: translateX(-100px);
+        width: 85px;
+    }
+
+    #btnHome {
+        top: 580px;
+        left: 50%;
+        transform: translateX(15px);
+        width: 85px;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(13, 59, 47, 0.3);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #66d9a8 0%, #52c997 100%);
+    }
+</style>
+
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Home Panel -->
+        <div id="homePanel" class="panel active">
+            <h1 id="homeTitle">Math & Physics App</h1>
+            <button id="btnStart" class="btn home-btn">Start</button>
+            <button id="btnReset" class="btn home-btn">Reset</button>
+            <button id="btnXOnly" class="btn home-btn">× Only</button>
+            <button id="btnImport" class="btn home-btn">Import</button>
+        </div>
+
+```
+    <!-- Import Panel -->
+    <div id="importPanel" class="panel">
+        <h2 class="import-header">Import Excel File</h2>
+
+        <div class="import-section">
+            <div class="section-title">📁 From Google Drive</div>
+            <button id="driveBtn" class="btn">Open Google Drive</button>
+        </div>
+
+        <div class="or-divider">OR</div>
+
+        <div class="import-section">
+            <div class="section-title">💾 From Local File</div>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".xlsx, .xls" />
+            </div>
+        </div>
+
+        <select id="sheetSelector">
+            <option value="">Select a sheet...</option>
+        </select>
+        
+        <button id="importBtn" class="btn">Load Selected Sheet</button>
+        <div id="importStatus"></div>
+        <button id="backBtn" class="btn">Back to Home</button>
+    </div>
+
+    <!-- Quiz Panel -->
+    <div id="quizPanel" class="panel">
+        <div id="wordLabel"></div>
+        
+        <div class="input-container">
+            <div class="input-group">
+                <label class="input-label">Calculation Workspace</label>
+                <textarea id="calculationInput" class="input-field" placeholder="Work out your calculation here..."></textarea>
+            </div>
+            <div class="input-group">
+                <label class="input-label">Your Answer</label>
+                <input type="text" id="answerInput" class="input-field" placeholder="Enter your answer...">
+            </div>
+        </div>
+
+        <button id="btnCheck" class="btn quiz-btn">Check</button>
+        <div id="checkResult"></div>
+        <div id="infoLabel"></div>
+        
+        <button id="btnNext" class="btn quiz-btn">Next</button>
+        <button id="btnHome" class="btn quiz-btn">Home</button>
+        <button id="btnCorrect" class="btn quiz-btn">〇</button>
+        <button id="btnWrong" class="btn quiz-btn">×</button>
+    </div>
+</div>
+```
+
+<script>
+    // Google API Configuration
+    const CLIENT_ID = "601060783093-tgptd20ntvutjccv572qaeflv03o9sa0.apps.googleusercontent.com";
+    const API_KEY = "AIzaSyCh_DOXRrH0S68ELv-DVWtrzyFTKS80gjI";
+    const SCOPES = 'https://www.googleapis.com/auth/drive.readonly';
+
+    let tokenClient;
+    let accessToken = null;
+    let pickerInited = false;
+    let gisInited = false;
+
+    // Default sample problem data
+    let allWords = [
+        { word: "2 + 3 = ?", answer: "5", calculationProcess: "2 + 3 = 5" },
+        { word: "Velocity 5 m/s for 10 seconds. Distance = ?", answer: "50 m", calculationProcess: "Distance = Velocity × Time = 5 × 10 = 50 m" },
+        { word: "√16 = ?", answer: "4", calculationProcess: "√16 = 4 (4² = 16)" },
+        { word: "Work done by 10N force over 5m = ?", answer: "50 J", calculationProcess: "Work = Force × Distance = 10 × 5 = 50 J" },
+        { word: "Expand (x + 2)(x - 3)", answer: "x² - x - 6", calculationProcess: "x² - 3x + 2x - 6 = x² - x - 6" },
+        { word: "Force to accelerate 2kg mass at 3m/s² = ?", answer: "6 N", calculationProcess: "F = ma = 2 × 3 = 6 N" },
+        { word: "sin(30°) = ?", answer: "1/2", calculationProcess: "sin(30°) = 1/2" },
+        { word: "Kinetic Energy (mass 2kg, velocity 3m/s) = ?", answer: "9 J", calculationProcess: "E = (1/2)mv² = (1/2) × 2 × 3² = 9 J" }
+    ];
+
+    let workbook = null;
+
+    let state = {
+        remainingIdx: Array.from({ length: allWords.length }, (_, i) => i),
+        wrongWords: [],
+        correctWords: [],
+        currentWordIdx: -1,
+        xOnlyMode: false
+    };
+
+    // Initialize Google APIs
+    function gapiLoaded() {
+        gapi.load('picker', () => {
+            pickerInited = true;
+            console.log('Picker API loaded');
+        });
+    }
+
+    function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: '',
+        });
+        gisInited = true;
+        console.log('GIS loaded');
+    }
+
+    function openDrivePicker() {
+        if (!pickerInited || !gisInited) {
+            document.getElementById('importStatus').textContent = 'Google services are still loading... Please wait.';
+            return;
+        }
+
+        const showPicker = () => {
+            const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
+                .setIncludeFolders(true)
+                .setMimeTypes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel');
+
+            const picker = new google.picker.PickerBuilder()
+                .addView(view)
+                .setOAuthToken(accessToken)
+                .setDeveloperKey(API_KEY)
+                .setCallback(pickerCallback)
+                .setOrigin(window.location.protocol + '//' + window.location.host)
+                .build();
+            picker.setVisible(true);
+        };
+
+        tokenClient.callback = async (response) => {
+            if (response.error !== undefined) {
+                document.getElementById('importStatus').textContent = 'Authentication failed: ' + response.error;
+                return;
+            }
+            accessToken = response.access_token;
+            showPicker();
+        };
+
+        if (accessToken === null) {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+            tokenClient.requestAccessToken({ prompt: '' });
+        }
+    }
+
+    async function pickerCallback(data) {
+        if (data.action === google.picker.Action.PICKED) {
+            const fileId = data.docs[0].id;
+            const fileName = data.docs[0].name;
+
+            document.getElementById('importStatus').textContent = `Loading ${fileName}...`;
+
+            try {
+                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to download file from Google Drive');
+                }
+
+                const blob = await response.blob();
+                const arrayBuffer = await blob.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                workbook = XLSX.read(data, { type: 'array' });
+
+                const selector = document.getElementById('sheetSelector');
+                selector.innerHTML = '<option value="">Select a sheet...</option>';
+                workbook.SheetNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    selector.appendChild(option);
+                });
+
+                selector.style.display = 'block';
+                document.getElementById('importBtn').style.display = 'block';
+                document.getElementById('importStatus').textContent = `✓ File loaded from Google Drive. Select a sheet to import.`;
+            } catch (error) {
+                document.getElementById('importStatus').textContent = '✗ Error: ' + error.message;
+                console.error('Error loading file:', error);
+            }
+        }
+    }
+
+    function loadVocabulary() {
+        const saved = localStorage.getItem('mathPhysicsData');
+        if (saved) {
+            allWords = JSON.parse(saved);
+            state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
+        }
+    }
+
+    function saveVocabulary() {
+        localStorage.setItem('mathPhysicsData', JSON.stringify(allWords));
+    }
+
+    function loadProgress() {
+        const saved = localStorage.getItem('mathPhysicsProgress');
+        if (saved) {
+            const data = JSON.parse(saved);
+            state.remainingIdx = data.remainingIdx || state.remainingIdx;
+            state.wrongWords = data.wrongWords || [];
+            state.correctWords = data.correctWords || [];
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem('mathPhysicsProgress', JSON.stringify({
+            remainingIdx: state.remainingIdx,
+            wrongWords: state.wrongWords,
+            correctWords: state.correctWords
+        }));
+    }
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            workbook = XLSX.read(data, { type: 'array' });
+
+            const selector = document.getElementById('sheetSelector');
+            selector.innerHTML = '<option value="">Select a sheet...</option>';
+            workbook.SheetNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                selector.appendChild(option);
+            });
+
+            selector.style.display = 'block';
+            document.getElementById('importBtn').style.display = 'block';
+            document.getElementById('importStatus').textContent = '✓ File loaded. Select a sheet to import.';
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    document.getElementById('importBtn').addEventListener('click', function () {
+        const sheetName = document.getElementById('sheetSelector').value;
+        if (!sheetName) {
+            document.getElementById('importStatus').textContent = '⚠ Please select a sheet.';
+            return;
+        }
+
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        const newWords = [];
+        for (let i = 0; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            if (row[0] && row[1]) {
+                newWords.push({
+                    word: String(row[0]).trim(),
+                    answer: String(row[1]).trim(),
+                    calculationProcess: row[2] ? String(row[2]).trim() : ''
+                });
+            }
+        }
+
+        if (newWords.length === 0) {
+            document.getElementById('importStatus').textContent = '⚠ No valid data found in sheet.';
+            return;
+        }
+
+        allWords = newWords;
+        state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
+        state.wrongWords = [];
+        state.correctWords = [];
+
+        saveVocabulary();
+        saveProgress();
+
+        document.getElementById('importStatus').textContent = `✓ Successfully imported ${newWords.length} problems!`;
+
+        setTimeout(() => {
+            switchPanel('home');
+        }, 1500);
+    });
+
+    function normalizeAnswer(str) {
+        return str.toString()
+            .toLowerCase()
+            .replace(/\s+/g, '')
+            .replace(/[^\w\d.\/\-+=^*()]/g, '');
+    }
+
+    function checkAnswer() {
+        const userAnswer = document.getElementById('answerInput').value.trim();
+        const checkResult = document.getElementById('checkResult');
+        
+        if (!userAnswer) {
+            checkResult.textContent = '⚠ Please enter an answer!';
+            checkResult.className = '';
+            checkResult.style.display = 'block';
+            checkResult.style.background = 'linear-gradient(135deg, rgba(255, 193, 7, 0.95) 0%, rgba(255, 160, 0, 0.95) 100%)';
+            checkResult.style.color = 'white';
+            checkResult.style.border = '2px solid #ffca28';
+            setTimeout(() => {
+                checkResult.style.display = 'none';
+            }, 2000);
+            return;
+        }
+
+        const correctAnswer = allWords[state.currentWordIdx].answer;
+        const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
+
+        checkResult.style.display = 'block';
+        if (isCorrect) {
+            checkResult.textContent = '✓ Correct!';
+            checkResult.className = 'correct';
+        } else {
+            checkResult.textContent = `✗ Incorrect. Correct answer: ${correctAnswer}`;
+            checkResult.className = 'incorrect';
+        }
+
+        setTimeout(() => {
+            revealInfo();
+        }, 1200);
+
+        setTimeout(() => {
+            checkResult.style.display = 'none';
+        }, 3000);
+    }
+
+    function showNextWord() {
+        const wordLabel = document.getElementById('wordLabel');
+        const infoLabel = document.getElementById('infoLabel');
+        const calculationInput = document.getElementById('calculationInput');
+        const answerInput = document.getElementById('answerInput');
+        const checkResult = document.getElementById('checkResult');
+
+        calculationInput.value = '';
+        answerInput.value = '';
+        infoLabel.textContent = '';
+        checkResult.style.display = 'none';
+        checkResult.textContent = '';
+
+        if (state.xOnlyMode) {
+            if (state.wrongWords.length === 0) {
+                wordLabel.textContent = 'No more problems!';
+                infoLabel.textContent = '(No "×" problems)';
+                return;
+            }
+
+            const randomIdx = Math.floor(Math.random() * state.wrongWords.length);
+            state.currentWordIdx = state.wrongWords[randomIdx];
+        } else {
+            const possible = state.remainingIdx.filter(idx => !state.correctWords.includes(idx));
+
+            if (possible.length === 0) {
+                const fallback = Array.from({ length: allWords.length }, (_, i) => i)
+                    .filter(idx => !state.wrongWords.includes(idx) && !state.correctWords.includes(idx));
+
+                if (fallback.length === 0) {
+                    wordLabel.textContent = 'No more problems!';
+                    infoLabel.textContent = '';
+                    return;
+                }
+
+                const randomIdx = Math.floor(Math.random() * fallback.length);
+                state.currentWordIdx = fallback[randomIdx];
+            } else {
+                const randomIdx = Math.floor(Math.random() * possible.length);
+                state.currentWordIdx = possible[randomIdx];
+            }
+        }
+
+        wordLabel.textContent = allWords[state.currentWordIdx].word;
+    }
+
+    function revealInfo() {
+        const problem = allWords[state.currentWordIdx];
+        const infoLabel = document.getElementById('infoLabel');
+        infoLabel.textContent = `Answer: ${problem.answer}\n\nCalculation Process:\n${problem.calculationProcess}`;
+    }
+
+    function markWrong() {
+        if (!state.wrongWords.includes(state.currentWordIdx)) {
+            state.wrongWords.push(state.currentWordIdx);
+        }
+        revealInfo();
+        saveProgress();
+    }
+
+    function markCorrect() {
+        if (!state.correctWords.includes(state.currentWordIdx)) {
+            state.correctWords.push(state.currentWordIdx);
+        }
+
+        const wrongIdx = state.wrongWords.indexOf(state.currentWordIdx);
+        if (wrongIdx !== -1) {
+            state.wrongWords.splice(wrongIdx, 1);
+        }
+
+        revealInfo();
+        saveProgress();
+    }
+
+    function resetCorrectWords() {
+        state.remainingIdx = Array.from(new Set([...state.remainingIdx, ...state.correctWords]));
+        state.correctWords = [];
+        state.xOnlyMode = false;
+        saveProgress();
+        showNextWord();
+    }
+
+    function switchPanel(panelName, xOnlyMode = false) {
+        const panels = ['homePanel', 'quizPanel', 'importPanel'];
+        panels.forEach(p => {
+            document.getElementById(p).classList.remove('active');
+        });
+
+        if (panelName === 'quiz') {
+            document.getElementById('quizPanel').classList.add('active');
+            state.xOnlyMode = xOnlyMode;
+            showNextWord();
+        } else if (panelName === 'import') {
+            document.getElementById('importPanel').classList.add('active');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('sheetSelector').style.display = 'none';
+            document.getElementById('importBtn').style.display = 'none';
+            document.getElementById('importStatus').textContent = '';
+        } else {
+            document.getElementById('homePanel').classList.add('active');
+        }
+    }
+
+    document.getElementById('answerInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
+    });
+
+    document.getElementById('btnStart').addEventListener('click', () => switchPanel('quiz', false));
+    document.getElementById('btnReset').addEventListener('click', resetCorrectWords);
+    document.getElementById('btnXOnly').addEventListener('click', () => switchPanel('quiz', true));
+    document.getElementById('btnImport').addEventListener('click', () => switchPanel('import'));
+    document.getElementById('driveBtn').addEventListener('click', openDrivePicker);
+    document.getElementById('btnCheck').addEventListener('click', checkAnswer);
+    document.getElementById('btnNext').addEventListener('click', showNextWord);
+    document.getElementById('btnCorrect').addEventListener('click', markCorrect);
+    document.getElementById('btnWrong').addEventListener('click', markWrong);
+    document.getElementById('btnHome').addEventListener('click', () => switchPanel('home'));
+    document.getElementById('backBtn').addEventListener('click', () => switchPanel('home'));
+
+    window.addEventListener('load', () => {
+        if (typeof gapi !== 'undefined') {
+            gapiLoaded();
+        }
+        if (typeof google !== 'undefined' && google.accounts) {
+            gisLoaded();
+        }
+    });
+
+    loadVocabulary();
+    loadProgress();
+</script>
+
+</body>
+</html>
