@@ -3,828 +3,386 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Math & Physics App</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<style>
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #0d3b2f 0%, #1a5c47 50%, #0d3b2f 100%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 20px;
-    }
-
-    .app-container {
-        width: 100%;
-        max-width: 520px;
-        min-height: 720px;
-        background: linear-gradient(135deg, #1e5a45 0%, #2d7a5f 100%);
-        position: relative;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
-        overflow: hidden;
-    }
-
-    .panel {
-        width: 100%;
-        min-height: 720px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: none;
-        padding: 30px;
-    }
-
-    .panel.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .btn {
-        background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
-        color: white;
-        border: none;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 600;
-        border-radius: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(61, 168, 117, 0.3);
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-        touch-action: manipulation;
-        letter-spacing: 0.5px;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.2);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .btn:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-
-    .btn:hover {
-        background: linear-gradient(135deg, #66d9a8 0%, #52c997 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(61, 168, 117, 0.4);
-    }
-
-    .btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(61, 168, 117, 0.3);
-    }
-
-    @media (hover: none) {
-        .btn:hover {
-            transform: none;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Merger - Premium PDF Merge Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #0a3d2a 0%, #1a5c42 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+        color: #f0f0f0;
     }
 
-    /* Home Panel */
-    #homeTitle {
-        position: absolute;
-        top: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #e8f8f2;
-        font-size: 28px;
-        font-weight: 700;
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    h1 {
         text-align: center;
-        margin: 0;
-        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        letter-spacing: 0.5px;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #d4f1e8;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        letter-spacing: 1px;
     }
 
-    .home-btn {
-        width: 200px;
-        height: 56px;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 18px;
-    }
-
-    #btnStart {
-        top: 200px;
-    }
-
-    #btnReset {
-        top: 276px;
-    }
-
-    #btnXOnly {
-        top: 352px;
-    }
-
-    #btnImport {
-        top: 428px;
-    }
-
-    /* Import Panel */
-    .import-header {
+    .subtitle {
         text-align: center;
-        color: #e8f8f2;
-        font-size: 26px;
-        font-weight: 700;
+        color: #a8dcc8;
         margin-bottom: 40px;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        font-size: 1.1rem;
     }
 
-    .upload-box {
-        background: rgba(13, 59, 47, 0.4);
-        border: 2px dashed #52c997;
-        border-radius: 16px;
-        padding: 30px;
-        margin-bottom: 20px;
-        text-align: center;
+    .upload-section {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        margin-bottom: 30px;
+        border: 2px dashed #5fb88f;
         transition: all 0.3s ease;
     }
 
-    .upload-box:hover {
-        border-color: #66d9a8;
-        background: rgba(13, 59, 47, 0.6);
+    .upload-section:hover {
+        border-color: #7fd4ab;
+        background: rgba(255, 255, 255, 0.15);
     }
 
-    .file-input-wrapper {
-        position: relative;
-        display: inline-block;
-        margin-bottom: 15px;
+    .upload-area {
+        text-align: center;
     }
 
-    .upload-button {
-        background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
+    .upload-btn {
+        background: linear-gradient(135deg, #2d7a5f 0%, #3a9d75 100%);
         color: white;
-        padding: 12px 30px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
         cursor: pointer;
-        display: inline-block;
-        transition: transform 0.2s;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(45, 122, 95, 0.4);
+        font-weight: 600;
     }
 
-    .upload-button:hover {
+    .upload-btn:hover {
         transform: translateY(-2px);
-    }
-
-    .upload-button:active {
-        transform: scale(0.98);
+        box-shadow: 0 6px 20px rgba(45, 122, 95, 0.6);
+        background: linear-gradient(135deg, #3a9d75 0%, #2d7a5f 100%);
     }
 
     input[type="file"] {
         display: none;
     }
 
+    .file-list {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 30px;
+        min-height: 200px;
+    }
+
+    .file-item {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: move;
+        transition: all 0.3s ease;
+        border-left: 4px solid #5fb88f;
+    }
+
+    .file-item:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateX(5px);
+    }
+
+    .file-item.dragging {
+        opacity: 0.5;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+    }
+
+    .drag-handle {
+        color: #a8dcc8;
+        font-size: 1.5rem;
+        cursor: grab;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
     .file-name {
-        color: #b8e6d5;
-        font-weight: 600;
-        margin-top: 15px;
-        font-size: 14px;
-        min-height: 20px;
-    }
-
-    #sheetSelector {
-        width: 100%;
-        max-width: 320px;
-        padding: 14px;
-        margin: 20px auto;
-        display: none;
-        font-size: 16px;
-        background: rgba(13, 59, 47, 0.8);
-        color: #e8f8f2;
-        border: 2px solid #52c997;
-        border-radius: 12px;
-        cursor: pointer;
         font-weight: 500;
+        color: #d4f1e8;
     }
 
-    #sheetSelector option {
-        background: #1a5c47;
-        color: #e8f8f2;
+    .file-size {
+        color: #a8dcc8;
+        font-size: 0.9rem;
     }
 
-    #importBtn {
-        display: none;
-        margin: 20px auto;
-        width: 220px;
-        height: 50px;
-    }
-
-    #backBtn {
-        display: block;
-        margin: 30px auto 0;
-        width: 160px;
-        height: 48px;
-        background: linear-gradient(135deg, #34705a 0%, #2d5f4d 100%);
-    }
-
-    #backBtn:hover {
-        background: linear-gradient(135deg, #3d8568 0%, #34705a 100%);
-    }
-
-    #importStatus {
-        text-align: center;
-        margin-top: 20px;
-        color: #b8e6d5;
-        font-weight: 600;
-        font-size: 14px;
-        min-height: 24px;
-        padding: 8px;
+    .remove-btn {
+        background: rgba(220, 53, 69, 0.8);
+        color: white;
+        border: none;
+        padding: 8px 16px;
         border-radius: 8px;
-        background: rgba(82, 201, 151, 0.1);
-    }
-
-    /* Quiz Panel */
-    #wordLabel {
-        position: absolute;
-        top: 30px;
-        left: 30px;
-        right: 30px;
-        max-height: 100px;
-        overflow-y: auto;
-        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
         font-weight: 500;
-        text-align: center;
-        color: #e8f8f2;
-        padding: 16px;
-        background: rgba(13, 59, 47, 0.5);
-        border-radius: 12px;
-        border: 2px solid rgba(82, 201, 151, 0.3);
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        line-height: 1.5;
     }
 
-    .input-container {
-        position: absolute;
-        top: 150px;
-        left: 30px;
-        right: 30px;
+    .remove-btn:hover {
+        background: rgba(220, 53, 69, 1);
+        transform: scale(1.05);
     }
 
-    .input-group {
-        margin-bottom: 16px;
-    }
-
-    .input-label {
+    .merge-btn {
         display: block;
-        color: #b8e6d5;
-        font-size: 13px;
-        margin-bottom: 8px;
+        width: 100%;
+        background: linear-gradient(135deg, #3a9d75 0%, #5fb88f 100%);
+        color: white;
+        padding: 18px;
+        border: none;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(58, 157, 117, 0.4);
         font-weight: 600;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    .input-field {
-        width: 100%;
-        padding: 14px 16px;
-        border: 2px solid #52c997;
-        border-radius: 12px;
-        font-size: 16px;
-        background: rgba(13, 59, 47, 0.6);
-        color: #e8f8f2;
-        resize: vertical;
-        -webkit-appearance: none;
-        appearance: none;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        transition: all 0.3s ease;
+    .merge-btn:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(58, 157, 117, 0.6);
     }
 
-    .input-field:focus {
-        outline: none;
-        border-color: #66d9a8;
-        background: rgba(13, 59, 47, 0.8);
-        box-shadow: 0 0 0 4px rgba(82, 201, 151, 0.1);
+    .merge-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
-    .input-field::placeholder {
-        color: #7fb8a3;
-        opacity: 0.7;
-    }
-
-    textarea.input-field {
-        min-height: 60px;
-    }
-
-    #infoLabel {
-        position: absolute;
-        top: 420px;
-        left: 30px;
-        right: 30px;
-        max-height: 90px;
-        overflow-y: auto;
-        font-size: 14px;
-        text-align: left;
-        color: #b8e6d5;
-        white-space: pre-line;
-        padding: 16px;
-        line-height: 1.6;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        background: rgba(13, 59, 47, 0.6);
-        border-radius: 12px;
-        border: 2px solid rgba(82, 201, 151, 0.3);
-    }
-
-    #checkResult {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 480px;
+    .empty-state {
         text-align: center;
-        font-size: 16px;
-        font-weight: 700;
-        padding: 16px 20px;
-        border-radius: 16px;
-        display: none;
-        z-index: 1000;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(10px);
+        padding: 40px;
+        color: #a8dcc8;
+        font-size: 1.1rem;
     }
 
-    #checkResult.correct {
-        background: linear-gradient(135deg, rgba(76, 175, 80, 0.95) 0%, rgba(56, 142, 60, 0.95) 100%);
-        color: white;
-        border: 2px solid #66bb6a;
-        animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #7fd4ab;
+        font-weight: 500;
     }
 
-    #checkResult.incorrect {
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.95) 0%, rgba(211, 47, 47, 0.95) 100%);
-        color: white;
-        border: 2px solid #ef5350;
-        animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
 
-    @keyframes slideDown {
-        from {
-            transform: translateX(-50%) translateY(-100px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .quiz-btn {
-        height: 48px;
-        position: absolute;
-        font-size: 16px;
-    }
-
-    #btnCheck {
-        top: 360px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 120px;
-        height: 50px;
-    }
-
-    #btnCorrect {
-        top: 560px;
-        left: 50%;
-        transform: translateX(-100px);
-        width: 85px;
-    }
-
-    #btnWrong {
-        top: 560px;
-        left: 50%;
-        transform: translateX(15px);
-        width: 85px;
-    }
-
-    #btnNext {
-        top: 620px;
-        left: 50%;
-        transform: translateX(-100px);
-        width: 85px;
-    }
-
-    #btnHome {
-        top: 620px;
-        left: 50%;
-        transform: translateX(15px);
-        width: 85px;
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: rgba(13, 59, 47, 0.3);
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #52c997 0%, #3da875 100%);
-        border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #66d9a8 0%, #52c997 100%);
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(127, 212, 171, 0.3);
+        border-top-color: #7fd4ab;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-right: 10px;
     }
 </style>
+```
 
 </head>
-
 <body>
-    <div class="app-container">
-        <!-- Home Panel -->
-        <div id="homePanel" class="panel active">
-            <h1 id="homeTitle">Math & Physics App</h1>
-            <button id="btnStart" class="btn home-btn">Start</button>
-            <button id="btnReset" class="btn home-btn">Reset</button>
-            <button id="btnXOnly" class="btn home-btn">× Only</button>
-            <button id="btnImport" class="btn home-btn">Import</button>
-        </div>
+    <div class="container">
+        <h1>✨ PDF Merger ✨</h1>
+        <p class="subtitle">Premium Tool for Merging Multiple PDF Files</p>
 
 ```
-    <!-- Import Panel -->
-    <div id="importPanel" class="panel">
-        <h2 class="import-header">Import Excel File</h2>
-
-        <div class="upload-box">
-            <div class="file-input-wrapper">
-                <div class="upload-button">📁 Select File</div>
-                <input type="file" id="fileInput" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,.xlsx,.xls,*/*">
-            </div>
-            <div class="file-name" id="fileName"></div>
+    <div class="upload-section">
+        <div class="upload-area">
+            <input type="file" id="fileInput" accept="application/pdf,.pdf,*/*" multiple>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                📄 Select PDF Files
+            </button>
+            <p style="margin-top: 15px; color: #a8dcc8; font-size: 0.9rem;">
+                📱 Choose from Files, Google Drive, iCloud, or Dropbox
+            </p>
         </div>
-
-        <select id="sheetSelector">
-            <option value="">Select a sheet...</option>
-        </select>
-        
-        <button id="importBtn" class="btn">Load Selected Sheet</button>
-        <div id="importStatus"></div>
-        <button id="backBtn" class="btn">Back to Home</button>
     </div>
 
-    <!-- Quiz Panel -->
-    <div id="quizPanel" class="panel">
-        <div id="wordLabel"></div>
-        
-        <div class="input-container">
-            <div class="input-group">
-                <label class="input-label">Calculation Workspace</label>
-                <textarea id="calculationInput" class="input-field" placeholder="Work out your calculation here..."></textarea>
-            </div>
-            <div class="input-group">
-                <label class="input-label">Your Answer</label>
-                <input type="text" id="answerInput" class="input-field" placeholder="Enter your answer...">
-            </div>
+    <div class="file-list" id="fileList">
+        <div class="empty-state">
+            Upload your PDF files<br>
+            <small>Drag & drop to reorder files</small>
         </div>
-
-        <button id="btnCheck" class="btn quiz-btn">Check</button>
-        <div id="checkResult"></div>
-        <div id="infoLabel"></div>
-        
-        <button id="btnNext" class="btn quiz-btn">Next</button>
-        <button id="btnHome" class="btn quiz-btn">Home</button>
-        <button id="btnCorrect" class="btn quiz-btn">〇</button>
-        <button id="btnWrong" class="btn quiz-btn">×</button>
     </div>
+
+    <button class="merge-btn" id="mergeBtn" onclick="mergePDFs()" disabled>
+        🔗 Merge & Download PDF
+    </button>
 </div>
-```
 
 <script>
-    // Default sample problem data
-    let allWords = [
-        { word: "2 + 3 = ?", answer: "5", calculationProcess: "2 + 3 = 5" },
-        { word: "Velocity 5 m/s for 10 seconds. Distance = ?", answer: "50 m", calculationProcess: "Distance = Velocity × Time = 5 × 10 = 50 m" },
-        { word: "√16 = ?", answer: "4", calculationProcess: "√16 = 4 (4² = 16)" },
-        { word: "Work done by 10N force over 5m = ?", answer: "50 J", calculationProcess: "Work = Force × Distance = 10 × 5 = 50 J" },
-        { word: "Expand (x + 2)(x - 3)", answer: "x² - x - 6", calculationProcess: "x² - 3x + 2x - 6 = x² - x - 6" },
-        { word: "Force to accelerate 2kg mass at 3m/s² = ?", answer: "6 N", calculationProcess: "F = ma = 2 × 3 = 6 N" },
-        { word: "sin(30°) = ?", answer: "1/2", calculationProcess: "sin(30°) = 1/2" },
-        { word: "Kinetic Energy (mass 2kg, velocity 3m/s) = ?", answer: "9 J", calculationProcess: "E = (1/2)mv² = (1/2) × 2 × 3² = 9 J" }
-    ];
+    let files = [];
+    let draggedIndex = null;
 
-    let workbook = null;
-
-    let state = {
-        remainingIdx: Array.from({ length: allWords.length }, (_, i) => i),
-        wrongWords: [],
-        correctWords: [],
-        currentWordIdx: -1,
-        xOnlyMode: false
-    };
-
-    function loadVocabulary() {
-        const saved = localStorage.getItem('mathPhysicsData');
-        if (saved) {
-            allWords = JSON.parse(saved);
-            state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
-        }
-    }
-
-    function saveVocabulary() {
-        localStorage.setItem('mathPhysicsData', JSON.stringify(allWords));
-    }
-
-    function loadProgress() {
-        const saved = localStorage.getItem('mathPhysicsProgress');
-        if (saved) {
-            const data = JSON.parse(saved);
-            state.remainingIdx = data.remainingIdx || state.remainingIdx;
-            state.wrongWords = data.wrongWords || [];
-            state.correctWords = data.correctWords || [];
-        }
-    }
-
-    function saveProgress() {
-        localStorage.setItem('mathPhysicsProgress', JSON.stringify({
-            remainingIdx: state.remainingIdx,
-            wrongWords: state.wrongWords,
-            correctWords: state.correctWords
-        }));
-    }
-
-    // Get DOM elements
-    const fileInput = document.getElementById('fileInput');
-    const uploadButton = document.querySelector('.upload-button');
-    const fileName = document.getElementById('fileName');
-
-    // Upload button click handler - exactly like FFT code
-    uploadButton.addEventListener('click', () => fileInput.click());
-
-    // Handle local file selection - exactly like FFT code
-    fileInput.addEventListener('change', function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        fileName.textContent = `Selected: ${file.name}`;
-
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const data = new Uint8Array(e.target.result);
-            workbook = XLSX.read(data, { type: 'array' });
-
-            const selector = document.getElementById('sheetSelector');
-            selector.innerHTML = '<option value="">Select a sheet...</option>';
-            workbook.SheetNames.forEach(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                selector.appendChild(option);
-            });
-
-            selector.style.display = 'block';
-            document.getElementById('importBtn').style.display = 'block';
-            document.getElementById('importStatus').textContent = '✓ File loaded. Select a sheet to import.';
-        };
-        reader.readAsArrayBuffer(file);
+    // File input change event
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+        const newFiles = Array.from(e.target.files);
+        files = [...files, ...newFiles];
+        renderFileList();
+        e.target.value = '';
     });
 
-    // Handle import button click
-    document.getElementById('importBtn').addEventListener('click', function () {
-        const sheetName = document.getElementById('sheetSelector').value;
-        if (!sheetName) {
-            document.getElementById('importStatus').textContent = '⚠ Please select a sheet.';
+    // Render the file list
+    function renderFileList() {
+        const fileList = document.getElementById('fileList');
+        const mergeBtn = document.getElementById('mergeBtn');
+
+        if (files.length === 0) {
+            fileList.innerHTML = `
+                <div class="empty-state">
+                    Upload your PDF files<br>
+                    <small>Drag & drop to reorder files</small>
+                </div>
+            `;
+            mergeBtn.disabled = true;
             return;
         }
 
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        fileList.innerHTML = files.map((file, index) => `
+            <div class="file-item" draggable="true" data-index="${index}">
+                <div class="file-info">
+                    <span class="drag-handle">⋮⋮</span>
+                    <div>
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                </div>
+                <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
+            </div>
+        `).join('');
 
-        const newWords = [];
-        for (let i = 0; i < jsonData.length; i++) {
-            const row = jsonData[i];
-            if (row[0] && row[1]) {
-                newWords.push({
-                    word: String(row[0]).trim(),
-                    answer: String(row[1]).trim(),
-                    calculationProcess: row[2] ? String(row[2]).trim() : ''
-                });
-            }
-        }
+        mergeBtn.disabled = files.length < 2;
 
-        if (newWords.length === 0) {
-            document.getElementById('importStatus').textContent = '⚠ No valid data found in sheet.';
-            return;
-        }
-
-        allWords = newWords;
-        state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
-        state.wrongWords = [];
-        state.correctWords = [];
-
-        saveVocabulary();
-        saveProgress();
-
-        document.getElementById('importStatus').textContent = `✓ Successfully imported ${newWords.length} problems!`;
-
-        setTimeout(() => {
-            switchPanel('home');
-        }, 1500);
-    });
-
-    function normalizeAnswer(str) {
-        return str.toString()
-            .toLowerCase()
-            .replace(/\s+/g, '')
-            .replace(/[^\w\d.\/\-+=^*()]/g, '');
-    }
-
-    function checkAnswer() {
-        const userAnswer = document.getElementById('answerInput').value.trim();
-        const checkResult = document.getElementById('checkResult');
-        
-        if (!userAnswer) {
-            checkResult.textContent = '⚠ Please enter an answer!';
-            checkResult.className = '';
-            checkResult.style.display = 'block';
-            checkResult.style.background = 'linear-gradient(135deg, rgba(255, 193, 7, 0.95) 0%, rgba(255, 160, 0, 0.95) 100%)';
-            checkResult.style.color = 'white';
-            checkResult.style.border = '2px solid #ffca28';
-            setTimeout(() => {
-                checkResult.style.display = 'none';
-            }, 2000);
-            return;
-        }
-
-        const correctAnswer = allWords[state.currentWordIdx].answer;
-        const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
-
-        checkResult.style.display = 'block';
-        if (isCorrect) {
-            checkResult.textContent = '✓ Correct!';
-            checkResult.className = 'correct';
-        } else {
-            checkResult.textContent = `✗ Incorrect. Correct answer: ${correctAnswer}`;
-            checkResult.className = 'incorrect';
-        }
-
-        setTimeout(() => {
-            revealInfo();
-        }, 1200);
-
-        setTimeout(() => {
-            checkResult.style.display = 'none';
-        }, 3000);
-    }
-
-    function showNextWord() {
-        const wordLabel = document.getElementById('wordLabel');
-        const infoLabel = document.getElementById('infoLabel');
-        const calculationInput = document.getElementById('calculationInput');
-        const answerInput = document.getElementById('answerInput');
-        const checkResult = document.getElementById('checkResult');
-
-        calculationInput.value = '';
-        answerInput.value = '';
-        infoLabel.textContent = '';
-        checkResult.style.display = 'none';
-        checkResult.textContent = '';
-
-        if (state.xOnlyMode) {
-            if (state.wrongWords.length === 0) {
-                wordLabel.textContent = 'No more problems!';
-                infoLabel.textContent = '(No "×" problems)';
-                return;
-            }
-
-            const randomIdx = Math.floor(Math.random() * state.wrongWords.length);
-            state.currentWordIdx = state.wrongWords[randomIdx];
-        } else {
-            const possible = state.remainingIdx.filter(idx => !state.correctWords.includes(idx));
-
-            if (possible.length === 0) {
-                const fallback = Array.from({ length: allWords.length }, (_, i) => i)
-                    .filter(idx => !state.wrongWords.includes(idx) && !state.correctWords.includes(idx));
-
-                if (fallback.length === 0) {
-                    wordLabel.textContent = 'No more problems!';
-                    infoLabel.textContent = '';
-                    return;
-                }
-
-                const randomIdx = Math.floor(Math.random() * fallback.length);
-                state.currentWordIdx = fallback[randomIdx];
-            } else {
-                const randomIdx = Math.floor(Math.random() * possible.length);
-                state.currentWordIdx = possible[randomIdx];
-            }
-        }
-
-        wordLabel.textContent = allWords[state.currentWordIdx].word;
-    }
-
-    function revealInfo() {
-        const problem = allWords[state.currentWordIdx];
-        const infoLabel = document.getElementById('infoLabel');
-        infoLabel.textContent = `Answer: ${problem.answer}\n\nCalculation Process:\n${problem.calculationProcess}`;
-    }
-
-    function markWrong() {
-        if (!state.wrongWords.includes(state.currentWordIdx)) {
-            state.wrongWords.push(state.currentWordIdx);
-        }
-        revealInfo();
-        saveProgress();
-    }
-
-    function markCorrect() {
-        if (!state.correctWords.includes(state.currentWordIdx)) {
-            state.correctWords.push(state.currentWordIdx);
-        }
-
-        const wrongIdx = state.wrongWords.indexOf(state.currentWordIdx);
-        if (wrongIdx !== -1) {
-            state.wrongWords.splice(wrongIdx, 1);
-        }
-
-        revealInfo();
-        saveProgress();
-    }
-
-    function resetCorrectWords() {
-        state.remainingIdx = Array.from(new Set([...state.remainingIdx, ...state.correctWords]));
-        state.correctWords = [];
-        state.xOnlyMode = false;
-        saveProgress();
-        showNextWord();
-    }
-
-    function switchPanel(panelName, xOnlyMode = false) {
-        const panels = ['homePanel', 'quizPanel', 'importPanel'];
-        panels.forEach(p => {
-            document.getElementById(p).classList.remove('active');
+        // Attach drag and drop event listeners
+        const items = fileList.querySelectorAll('.file-item');
+        items.forEach(item => {
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('drop', handleDrop);
+            item.addEventListener('dragend', handleDragEnd);
         });
+    }
 
-        if (panelName === 'quiz') {
-            document.getElementById('quizPanel').classList.add('active');
-            state.xOnlyMode = xOnlyMode;
-            showNextWord();
-        } else if (panelName === 'import') {
-            document.getElementById('importPanel').classList.add('active');
-            document.getElementById('fileInput').value = '';
-            document.getElementById('fileName').textContent = '';
-            document.getElementById('sheetSelector').style.display = 'none';
-            document.getElementById('importBtn').style.display = 'none';
-            document.getElementById('importStatus').textContent = '';
-        } else {
-            document.getElementById('homePanel').classList.add('active');
+    // Handle drag start
+    function handleDragStart(e) {
+        draggedIndex = parseInt(e.target.dataset.index);
+        e.target.classList.add('dragging');
+    }
+
+    // Handle drag over
+    function handleDragOver(e) {
+        e.preventDefault();
+    }
+
+    // Handle drop
+    function handleDrop(e) {
+        e.preventDefault();
+        const dropIndex = parseInt(e.target.closest('.file-item').dataset.index);
+        
+        if (draggedIndex !== null && draggedIndex !== dropIndex) {
+            const draggedFile = files[draggedIndex];
+            files.splice(draggedIndex, 1);
+            files.splice(dropIndex, 0, draggedFile);
+            renderFileList();
         }
     }
 
-    document.getElementById('answerInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            checkAnswer();
+    // Handle drag end
+    function handleDragEnd(e) {
+        e.target.classList.remove('dragging');
+        draggedIndex = null;
+    }
+
+    // Remove file from list
+    function removeFile(index) {
+        files.splice(index, 1);
+        renderFileList();
+    }
+
+    // Format file size for display
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // Merge PDFs and download
+    async function mergePDFs() {
+        if (files.length < 2) return;
+
+        const mergeBtn = document.getElementById('mergeBtn');
+        mergeBtn.innerHTML = '<span class="spinner"></span>Merging...';
+        mergeBtn.disabled = true;
+
+        try {
+            const { PDFDocument } = PDFLib;
+            const mergedPdf = await PDFDocument.create();
+
+            // Loop through each file and merge
+            for (const file of files) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await PDFDocument.load(arrayBuffer);
+                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                copiedPages.forEach(page => mergedPdf.addPage(page));
+            }
+
+            // Save and download merged PDF
+            const mergedPdfBytes = await mergedPdf.save();
+            const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'merged_' + new Date().getTime() + '.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            mergeBtn.innerHTML = '✅ Complete! Merge Again';
+        } catch (error) {
+            alert('An error occurred: ' + error.message);
+            mergeBtn.innerHTML = '🔗 Merge & Download PDF';
+        } finally {
+            mergeBtn.disabled = false;
         }
-    });
-
-    document.getElementById('btnStart').addEventListener('click', () => switchPanel('quiz', false));
-    document.getElementById('btnReset').addEventListener('click', resetCorrectWords);
-    document.getElementById('btnXOnly').addEventListener('click', () => switchPanel('quiz', true));
-    document.getElementById('btnImport').addEventListener('click', () => switchPanel('import'));
-    document.getElementById('btnCheck').addEventListener('click', checkAnswer);
-    document.getElementById('btnNext').addEventListener('click', showNextWord);
-    document.getElementById('btnCorrect').addEventListener('click', markCorrect);
-    document.getElementById('btnWrong').addEventListener('click', markWrong);
-    document.getElementById('btnHome').addEventListener('click', () => switchPanel('home'));
-    document.getElementById('backBtn').addEventListener('click', () => switchPanel('home'));
-
-    loadVocabulary();
-    loadProgress();
+    }
 </script>
+```
 
 </body>
 </html>
