@@ -26,7 +26,7 @@
     .app-container {
         width: 100%;
         max-width: 500px;
-        min-height: 400px;
+        height: 600px;
         background: linear-gradient(135deg, #234d3f 0%, #2d6552 100%);
         position: relative;
         border-radius: 12px;
@@ -36,12 +36,13 @@
 
     .panel {
         width: 100%;
-        min-height: 400px;
+        height: 100%;
         position: absolute;
         top: 0;
         left: 0;
         display: none;
         background: linear-gradient(135deg, #234d3f 0%, #2d6552 100%);
+        overflow-y: auto;
     }
 
     .panel.active {
@@ -109,15 +110,14 @@
     }
 
     #importPanel {
-        padding: 30px 20px;
-        overflow-y: auto;
+        padding: 30px 20px 40px 20px;
     }
 
     .import-title {
         text-align: center;
         color: #e8f5e9;
         padding-top: 10px;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         font-size: 24px;
         font-weight: 600;
     }
@@ -126,7 +126,7 @@
         text-align: center;
         color: #c8e6c9;
         font-size: 13px;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         line-height: 1.5;
         padding: 0 10px;
     }
@@ -135,9 +135,9 @@
         background: rgba(74, 157, 127, 0.2);
         border: 2px dashed #4a9d7f;
         border-radius: 12px;
-        padding: 30px;
+        padding: 25px;
         text-align: center;
-        margin-bottom: 25px;
+        margin-bottom: 20px;
         transition: all 0.3s;
     }
 
@@ -181,7 +181,7 @@
     .file-name {
         color: #c8e6c9;
         font-weight: 600;
-        margin-top: 15px;
+        margin-top: 12px;
         font-size: 13px;
         min-height: 20px;
     }
@@ -190,7 +190,7 @@
         width: calc(100% - 40px);
         max-width: 400px;
         padding: 12px;
-        margin: 20px auto;
+        margin: 15px auto;
         display: block;
         font-size: 14px;
         background: #2d5f4d;
@@ -199,11 +199,10 @@
         border-radius: 8px;
     }
 
-    /* Range selector styles */
     .range-selector {
         width: calc(100% - 40px);
         max-width: 400px;
-        margin: 20px auto;
+        margin: 15px auto;
         padding: 15px;
         background: rgba(74, 157, 127, 0.2);
         border-radius: 8px;
@@ -255,7 +254,7 @@
 
     #importBtn {
         display: block;
-        margin: 20px auto;
+        margin: 15px auto;
         width: 200px;
         height: 45px;
         font-size: 16px;
@@ -263,14 +262,15 @@
 
     #backBtn {
         display: block;
-        margin: 20px auto;
+        margin: 15px auto 30px auto;
         width: 150px;
         height: 40px;
     }
 
     #importStatus {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 15px;
+        margin-bottom: 20px;
         color: #c8e6c9;
         font-weight: 500;
         padding: 0 20px;
@@ -376,7 +376,7 @@
                     <input 
                         type="file" 
                         id="fileInput" 
-                        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,image/*"
+                        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                     />
                 </div>
                 <div class="file-name" id="fileName"></div>
@@ -387,16 +387,16 @@
             </select>
 
             <div id="rangeSelector" class="range-selector">
-                <div class="range-label">問題範囲を選択</div>
+                <div class="range-label">Select Question Range</div>
                 <div class="range-inputs">
                     <input type="number" id="rangeStart" min="1" value="1" />
-                    <span>〜</span>
+                    <span>to</span>
                     <input type="number" id="rangeEnd" min="1" value="1" />
                 </div>
                 <div class="total-count" id="totalCount"></div>
             </div>
 
-            <button id="importBtn" class="btn" style="display: none;">Load Selected Sheet</button>
+            <button id="importBtn" class="btn" style="display: none;">Load Selected Range</button>
             <button id="backBtn" class="btn">Back</button>
             <div id="importStatus"></div>
         </div>
@@ -474,7 +474,7 @@
         rangeEnd.max = totalRows;
         rangeEnd.value = totalRows;
 
-        totalCount.textContent = `総問題数: ${totalRows}`;
+        totalCount.textContent = `Total questions: ${totalRows}`;
     }
 
     function validateRange() {
@@ -502,7 +502,7 @@
         document.getElementById('fileName').textContent = `Selected: ${file.name}`;
 
         if (file.type.startsWith('image/')) {
-            document.getElementById('importStatus').textContent = 'Image files are not supported yet. Please select an Excel file (.xlsx or .xls).';
+            document.getElementById('importStatus').textContent = 'Image files are not supported. Please select an Excel file (.xlsx or .xls).';
             return;
         }
 
@@ -589,7 +589,7 @@
         saveVocabulary();
         saveProgress();
 
-        document.getElementById('importStatus').textContent = `Successfully imported ${newWords.length} words (${rangeStart}〜${rangeEnd})!`;
+        document.getElementById('importStatus').textContent = `Successfully imported ${newWords.length} words (${rangeStart} to ${rangeEnd})!`;
 
         setTimeout(() => {
             switchPanel('home');
@@ -681,7 +681,9 @@
             state.xOnlyMode = xOnlyMode;
             showNextWord();
         } else if (panelName === 'import') {
-            document.getElementById('importPanel').classList.add('active');
+            const importPanel = document.getElementById('importPanel');
+            importPanel.classList.add('active');
+            importPanel.scrollTop = 0;
             document.getElementById('fileInput').value = '';
             document.getElementById('fileName').textContent = '';
             document.getElementById('sheetSelector').style.display = 'none';
