@@ -1,388 +1,715 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Merger - Premium PDF Merge Tool</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Vocabulary App</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-```
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #0a3d2a 0%, #1a5c42 100%);
+        background: linear-gradient(135deg, #1a3a2e 0%, #2d5f4d 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
         min-height: 100vh;
-        padding: 40px 20px;
-        color: #f0f0f0;
+        padding: 10px;
     }
 
-    .container {
-        max-width: 900px;
-        margin: 0 auto;
+    .app-container {
+        width: 100%;
+        max-width: 500px;
+        min-height: 400px;
+        background: linear-gradient(135deg, #234d3f 0%, #2d6552 100%);
+        position: relative;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
     }
 
-    h1 {
-        text-align: center;
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: #d4f1e8;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        letter-spacing: 1px;
+    .panel {
+        width: 100%;
+        min-height: 400px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: none;
+        background: linear-gradient(135deg, #234d3f 0%, #2d6552 100%);
     }
 
-    .subtitle {
-        text-align: center;
-        color: #a8dcc8;
-        margin-bottom: 40px;
-        font-size: 1.1rem;
+    .panel.active {
+        display: block;
     }
 
-    .upload-section {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 40px;
-        margin-bottom: 30px;
-        border: 2px dashed #5fb88f;
-        transition: all 0.3s ease;
-    }
-
-    .upload-section:hover {
-        border-color: #7fd4ab;
-        background: rgba(255, 255, 255, 0.15);
-    }
-
-    .upload-area {
-        text-align: center;
-    }
-
-    .upload-btn {
-        background: linear-gradient(135deg, #2d7a5f 0%, #3a9d75 100%);
+    .btn {
+        background: linear-gradient(135deg, #4a9d7f 0%, #3d8568 100%);
         color: white;
-        padding: 15px 40px;
         border: none;
-        border-radius: 50px;
-        font-size: 1.1rem;
         cursor: pointer;
+        font-size: 16px;
+        border-radius: 8px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(45, 122, 95, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         font-weight: 600;
     }
 
-    .upload-btn:hover {
+    .btn:hover {
+        background: linear-gradient(135deg, #5bb594 0%, #4a9d7f 100%);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(45, 122, 95, 0.6);
-        background: linear-gradient(135deg, #3a9d75 0%, #2d7a5f 100%);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:active {
+        background: linear-gradient(135deg, #3d8568 0%, #2d6552 100%);
+        transform: translateY(0);
+    }
+
+    #homeTitle {
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #e8f5e9;
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .home-btn {
+        width: 100px;
+        height: 40px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    #btnStart {
+        top: 150px;
+    }
+
+    #btnReset {
+        top: 200px;
+    }
+
+    #btnXOnly {
+        top: 250px;
+    }
+
+    #btnImport {
+        top: 300px;
+    }
+
+    #importPanel {
+        padding: 30px 20px;
+        overflow-y: auto;
+    }
+
+    .import-title {
+        text-align: center;
+        color: #e8f5e9;
+        padding-top: 10px;
+        margin-bottom: 20px;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .import-description {
+        text-align: center;
+        color: #c8e6c9;
+        font-size: 13px;
+        margin-bottom: 30px;
+        line-height: 1.5;
+        padding: 0 10px;
+    }
+
+    .upload-box {
+        background: rgba(74, 157, 127, 0.2);
+        border: 2px dashed #4a9d7f;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 25px;
+        transition: all 0.3s;
+    }
+
+    .upload-box:hover {
+        border-color: #5bb594;
+        background: rgba(74, 157, 127, 0.3);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        display: inline-block;
     }
 
     input[type="file"] {
         display: none;
     }
 
-    .file-list {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(10px);
-        border-radius: 15px;
-        padding: 20px;
-        margin-bottom: 30px;
-        min-height: 200px;
+    .upload-button {
+        background: linear-gradient(135deg, #4a9d7f 0%, #3d8568 100%);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-block;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .file-item {
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 12px;
-        padding: 15px 20px;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        cursor: move;
-        transition: all 0.3s ease;
-        border-left: 4px solid #5fb88f;
+    .upload-button:hover {
+        background: linear-gradient(135deg, #5bb594 0%, #4a9d7f 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
     }
 
-    .file-item:hover {
-        background: rgba(255, 255, 255, 0.18);
-        transform: translateX(5px);
-    }
-
-    .file-item.dragging {
-        opacity: 0.5;
-    }
-
-    .file-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        flex: 1;
-    }
-
-    .drag-handle {
-        color: #a8dcc8;
-        font-size: 1.5rem;
-        cursor: grab;
-    }
-
-    .drag-handle:active {
-        cursor: grabbing;
+    .upload-button:active {
+        transform: scale(0.98);
     }
 
     .file-name {
-        font-weight: 500;
-        color: #d4f1e8;
-    }
-
-    .file-size {
-        color: #a8dcc8;
-        font-size: 0.9rem;
-    }
-
-    .remove-btn {
-        background: rgba(220, 53, 69, 0.8);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
-
-    .remove-btn:hover {
-        background: rgba(220, 53, 69, 1);
-        transform: scale(1.05);
-    }
-
-    .merge-btn {
-        display: block;
-        width: 100%;
-        background: linear-gradient(135deg, #3a9d75 0%, #5fb88f 100%);
-        color: white;
-        padding: 18px;
-        border: none;
-        border-radius: 15px;
-        font-size: 1.2rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 20px rgba(58, 157, 117, 0.4);
+        color: #c8e6c9;
         font-weight: 600;
-        letter-spacing: 0.5px;
+        margin-top: 15px;
+        font-size: 13px;
+        min-height: 20px;
     }
 
-    .merge-btn:hover:not(:disabled) {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 25px rgba(58, 157, 117, 0.6);
+    #sheetSelector {
+        width: calc(100% - 40px);
+        max-width: 400px;
+        padding: 12px;
+        margin: 20px auto;
+        display: block;
+        font-size: 14px;
+        background: #2d5f4d;
+        color: #e8f5e9;
+        border: 2px solid #4a9d7f;
+        border-radius: 8px;
     }
 
-    .merge-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    /* Range selector styles */
+    .range-selector {
+        width: calc(100% - 40px);
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 15px;
+        background: rgba(74, 157, 127, 0.2);
+        border-radius: 8px;
+        display: none;
     }
 
-    .empty-state {
+    .range-selector.visible {
+        display: block;
+    }
+
+    .range-label {
+        color: #e8f5e9;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
         text-align: center;
-        padding: 40px;
-        color: #a8dcc8;
-        font-size: 1.1rem;
     }
 
-    .loading {
+    .range-inputs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .range-inputs input {
+        width: 80px;
+        padding: 8px;
+        font-size: 14px;
+        background: #2d5f4d;
+        color: #e8f5e9;
+        border: 2px solid #4a9d7f;
+        border-radius: 6px;
         text-align: center;
-        padding: 20px;
-        color: #7fd4ab;
+    }
+
+    .range-inputs span {
+        color: #c8e6c9;
+        font-weight: 600;
+    }
+
+    .total-count {
+        color: #c8e6c9;
+        font-size: 12px;
+        text-align: center;
+        margin-top: 8px;
+    }
+
+    #importBtn {
+        display: block;
+        margin: 20px auto;
+        width: 200px;
+        height: 45px;
+        font-size: 16px;
+    }
+
+    #backBtn {
+        display: block;
+        margin: 20px auto;
+        width: 150px;
+        height: 40px;
+    }
+
+    #importStatus {
+        text-align: center;
+        margin-top: 20px;
+        color: #c8e6c9;
         font-weight: 500;
+        padding: 0 20px;
+        min-height: 24px;
     }
 
-    @keyframes spin {
-        to { transform: rotate(360deg); }
+    #wordLabel {
+        position: absolute;
+        top: 40px;
+        left: 5%;
+        width: 90%;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 22px;
+        font-weight: normal;
+        text-align: center;
+        color: #e8f5e9;
+        padding: 10px;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(127, 212, 171, 0.3);
-        border-top-color: #7fd4ab;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin-right: 10px;
+    #infoLabel {
+        position: absolute;
+        top: 200px;
+        left: 5%;
+        width: 90%;
+        max-height: 140px;
+        overflow-y: auto;
+        font-size: 15px;
+        text-align: center;
+        color: #c8e6c9;
+        white-space: pre-line;
+        padding: 10px;
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .quiz-btn {
+        width: 90px;
+        height: 40px;
+        position: absolute;
+        font-size: 18px;
+        left: 50%;
+    }
+
+    #btnCorrect {
+        top: 300px;
+        transform: translateX(calc(-100% - 5px));
+    }
+
+    #btnWrong {
+        top: 300px;
+        transform: translateX(5px);
+    }
+
+    #btnNext {
+        top: 350px;
+        transform: translateX(calc(-100% - 5px));
+    }
+
+    #btnHome {
+        top: 350px;
+        transform: translateX(5px);
+    }
+
+    @media (max-width: 400px) {
+        .upload-box {
+            padding: 20px;
+        }
+
+        .upload-button {
+            padding: 10px 24px;
+            font-size: 13px;
+        }
     }
 </style>
-```
 
 </head>
+
 <body>
-    <div class="container">
-        <h1>✨ PDF Merger ✨</h1>
-        <p class="subtitle">Premium Tool for Merging Multiple PDF Files</p>
+    <div class="app-container">
+        <!-- Home Panel -->
+        <div id="homePanel" class="panel active">
+            <h1 id="homeTitle">Vocabulary App</h1>
+            <button id="btnStart" class="btn home-btn">Start</button>
+            <button id="btnReset" class="btn home-btn">Reset</button>
+            <button id="btnXOnly" class="btn home-btn">× Only</button>
+            <button id="btnImport" class="btn home-btn">Import</button>
+        </div>
 
-```
-    <div class="upload-section">
-        <div class="upload-area">
-            <input type="file" id="fileInput" accept="application/pdf,.pdf,*/*" multiple>
-            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-                📄 Select PDF Files
-            </button>
-            <p style="margin-top: 15px; color: #a8dcc8; font-size: 0.9rem;">
-                📱 Choose from Files, Google Drive, iCloud, or Dropbox
-            </p>
+        <!-- Import Panel -->
+        <div id="importPanel" class="panel">
+            <h2 class="import-title">Import Excel File</h2>
+            <p class="import-description">Select an Excel file from your device</p>
+
+            <div class="upload-box">
+                <div class="file-input-wrapper">
+                    <div class="upload-button">📁 Select File</div>
+                    <input 
+                        type="file" 
+                        id="fileInput" 
+                        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,image/*"
+                    />
+                </div>
+                <div class="file-name" id="fileName"></div>
+            </div>
+
+            <select id="sheetSelector" style="display: none;">
+                <option value="">Select a sheet</option>
+            </select>
+
+            <div id="rangeSelector" class="range-selector">
+                <div class="range-label">問題範囲を選択</div>
+                <div class="range-inputs">
+                    <input type="number" id="rangeStart" min="1" value="1" />
+                    <span>〜</span>
+                    <input type="number" id="rangeEnd" min="1" value="1" />
+                </div>
+                <div class="total-count" id="totalCount"></div>
+            </div>
+
+            <button id="importBtn" class="btn" style="display: none;">Load Selected Sheet</button>
+            <button id="backBtn" class="btn">Back</button>
+            <div id="importStatus"></div>
+        </div>
+
+        <!-- Quiz Panel -->
+        <div id="quizPanel" class="panel">
+            <div id="wordLabel"></div>
+            <div id="infoLabel"></div>
+            <button id="btnCorrect" class="btn quiz-btn">〇</button>
+            <button id="btnWrong" class="btn quiz-btn">×</button>
+            <button id="btnNext" class="btn quiz-btn">Next</button>
+            <button id="btnHome" class="btn quiz-btn">Home</button>
         </div>
     </div>
-
-    <div class="file-list" id="fileList">
-        <div class="empty-state">
-            Upload your PDF files<br>
-            <small>Drag & drop to reorder files</small>
-        </div>
-    </div>
-
-    <button class="merge-btn" id="mergeBtn" onclick="mergePDFs()" disabled>
-        🔗 Merge & Download PDF
-    </button>
-</div>
 
 <script>
-    let files = [];
-    let draggedIndex = null;
+    let allWords = [
+        { word: "Apple", meaning: "りんご", example: "I like apples." },
+        { word: "Banana", meaning: "バナナ", example: "Bananas are yellow." },
+        { word: "Cat", meaning: "猫", example: "The cat is sleeping." },
+        { word: "Dog", meaning: "犬", example: "The dog is barking." },
+        { word: "House", meaning: "家", example: "This is my house." },
+        { word: "Book", meaning: "本", example: "I read a book." },
+        { word: "Water", meaning: "水", example: "Please drink water." },
+        { word: "Sun", meaning: "太陽", example: "The sun is bright." }
+    ];
 
-    // File input change event
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-        const newFiles = Array.from(e.target.files);
-        files = [...files, ...newFiles];
-        renderFileList();
-        e.target.value = '';
-    });
+    let workbook = null;
+    let currentSheetData = null;
 
-    // Render the file list
-    function renderFileList() {
-        const fileList = document.getElementById('fileList');
-        const mergeBtn = document.getElementById('mergeBtn');
+    let state = {
+        remainingIdx: Array.from({ length: allWords.length }, (_, i) => i),
+        wrongWords: [],
+        correctWords: [],
+        currentWordIdx: -1,
+        xOnlyMode: false
+    };
 
-        if (files.length === 0) {
-            fileList.innerHTML = `
-                <div class="empty-state">
-                    Upload your PDF files<br>
-                    <small>Drag & drop to reorder files</small>
-                </div>
-            `;
-            mergeBtn.disabled = true;
+    function loadVocabulary() {
+        const saved = localStorage.getItem('vocabData');
+        if (saved) {
+            allWords = JSON.parse(saved);
+            state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
+        }
+    }
+
+    function saveVocabulary() {
+        localStorage.setItem('vocabData', JSON.stringify(allWords));
+    }
+
+    function loadProgress() {
+        const saved = localStorage.getItem('vocabProgress');
+        if (saved) {
+            const data = JSON.parse(saved);
+            state.remainingIdx = data.remainingIdx || state.remainingIdx;
+            state.wrongWords = data.wrongWords || [];
+            state.correctWords = data.correctWords || [];
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem('vocabProgress', JSON.stringify({
+            remainingIdx: state.remainingIdx,
+            wrongWords: state.wrongWords,
+            correctWords: state.correctWords
+        }));
+    }
+
+    function updateRangeSelector(totalRows) {
+        const rangeStart = document.getElementById('rangeStart');
+        const rangeEnd = document.getElementById('rangeEnd');
+        const totalCount = document.getElementById('totalCount');
+
+        rangeStart.max = totalRows;
+        rangeEnd.max = totalRows;
+        rangeEnd.value = totalRows;
+
+        totalCount.textContent = `総問題数: ${totalRows}`;
+    }
+
+    function validateRange() {
+        const rangeStart = document.getElementById('rangeStart');
+        const rangeEnd = document.getElementById('rangeEnd');
+
+        const start = parseInt(rangeStart.value);
+        const end = parseInt(rangeEnd.value);
+
+        if (start > end) {
+            rangeStart.value = end;
+        }
+        if (end < start) {
+            rangeEnd.value = start;
+        }
+    }
+
+    document.getElementById('rangeStart').addEventListener('input', validateRange);
+    document.getElementById('rangeEnd').addEventListener('input', validateRange);
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+
+        if (file.type.startsWith('image/')) {
+            document.getElementById('importStatus').textContent = 'Image files are not supported yet. Please select an Excel file (.xlsx or .xls).';
             return;
         }
 
-        fileList.innerHTML = files.map((file, index) => `
-            <div class="file-item" draggable="true" data-index="${index}">
-                <div class="file-info">
-                    <span class="drag-handle">⋮⋮</span>
-                    <div>
-                        <div class="file-name">${file.name}</div>
-                        <div class="file-size">${formatFileSize(file.size)}</div>
-                    </div>
-                </div>
-                <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
-            </div>
-        `).join('');
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                workbook = XLSX.read(data, { type: 'array' });
 
-        mergeBtn.disabled = files.length < 2;
+                const selector = document.getElementById('sheetSelector');
+                selector.innerHTML = '<option value="">Select a sheet</option>';
+                workbook.SheetNames.forEach(name => {
+                    const option = document.createElement('option');
+                    option.value = name;
+                    option.textContent = name;
+                    selector.appendChild(option);
+                });
 
-        // Attach drag and drop event listeners
-        const items = fileList.querySelectorAll('.file-item');
-        items.forEach(item => {
-            item.addEventListener('dragstart', handleDragStart);
-            item.addEventListener('dragover', handleDragOver);
-            item.addEventListener('drop', handleDrop);
-            item.addEventListener('dragend', handleDragEnd);
-        });
-    }
+                selector.style.display = 'block';
+                document.getElementById('importStatus').textContent = 'File loaded. Select a sheet.';
+            } catch (error) {
+                document.getElementById('importStatus').textContent = 'Error reading file. Please select a valid Excel file.';
+                console.error('Error:', error);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
 
-    // Handle drag start
-    function handleDragStart(e) {
-        draggedIndex = parseInt(e.target.dataset.index);
-        e.target.classList.add('dragging');
-    }
-
-    // Handle drag over
-    function handleDragOver(e) {
-        e.preventDefault();
-    }
-
-    // Handle drop
-    function handleDrop(e) {
-        e.preventDefault();
-        const dropIndex = parseInt(e.target.closest('.file-item').dataset.index);
-        
-        if (draggedIndex !== null && draggedIndex !== dropIndex) {
-            const draggedFile = files[draggedIndex];
-            files.splice(draggedIndex, 1);
-            files.splice(dropIndex, 0, draggedFile);
-            renderFileList();
+    document.getElementById('sheetSelector').addEventListener('change', function () {
+        const sheetName = this.value;
+        if (!sheetName) {
+            document.getElementById('rangeSelector').classList.remove('visible');
+            document.getElementById('importBtn').style.display = 'none';
+            return;
         }
-    }
 
-    // Handle drag end
-    function handleDragEnd(e) {
-        e.target.classList.remove('dragging');
-        draggedIndex = null;
-    }
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-    // Remove file from list
-    function removeFile(index) {
-        files.splice(index, 1);
-        renderFileList();
-    }
+        const validRows = jsonData.filter(row => row[0] && row[1]);
+        currentSheetData = validRows;
 
-    // Format file size for display
-    function formatFileSize(bytes) {
-        if (bytes < 1024) return bytes + ' B';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-    }
+        if (validRows.length === 0) {
+            document.getElementById('importStatus').textContent = 'No valid data found in sheet.';
+            document.getElementById('rangeSelector').classList.remove('visible');
+            document.getElementById('importBtn').style.display = 'none';
+            return;
+        }
 
-    // Merge PDFs and download
-    async function mergePDFs() {
-        if (files.length < 2) return;
+        updateRangeSelector(validRows.length);
+        document.getElementById('rangeSelector').classList.add('visible');
+        document.getElementById('importBtn').style.display = 'block';
+        document.getElementById('importStatus').textContent = '';
+    });
 
-        const mergeBtn = document.getElementById('mergeBtn');
-        mergeBtn.innerHTML = '<span class="spinner"></span>Merging...';
-        mergeBtn.disabled = true;
+    document.getElementById('importBtn').addEventListener('click', function () {
+        const sheetName = document.getElementById('sheetSelector').value;
+        if (!sheetName || !currentSheetData) {
+            document.getElementById('importStatus').textContent = 'Please select a sheet.';
+            return;
+        }
 
-        try {
-            const { PDFDocument } = PDFLib;
-            const mergedPdf = await PDFDocument.create();
+        const rangeStart = parseInt(document.getElementById('rangeStart').value);
+        const rangeEnd = parseInt(document.getElementById('rangeEnd').value);
 
-            // Loop through each file and merge
-            for (const file of files) {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await PDFDocument.load(arrayBuffer);
-                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                copiedPages.forEach(page => mergedPdf.addPage(page));
+        const selectedRows = currentSheetData.slice(rangeStart - 1, rangeEnd);
+
+        const newWords = selectedRows.map(row => ({
+            word: String(row[0]).trim(),
+            meaning: String(row[1]).trim(),
+            example: row[2] ? String(row[2]).trim() : ''
+        }));
+
+        if (newWords.length === 0) {
+            document.getElementById('importStatus').textContent = 'No valid data in selected range.';
+            return;
+        }
+
+        allWords = newWords;
+        state.remainingIdx = Array.from({ length: allWords.length }, (_, i) => i);
+        state.wrongWords = [];
+        state.correctWords = [];
+
+        saveVocabulary();
+        saveProgress();
+
+        document.getElementById('importStatus').textContent = `Successfully imported ${newWords.length} words (${rangeStart}〜${rangeEnd})!`;
+
+        setTimeout(() => {
+            switchPanel('home');
+        }, 2000);
+    });
+
+    function showNextWord() {
+        const wordLabel = document.getElementById('wordLabel');
+        const infoLabel = document.getElementById('infoLabel');
+
+        if (state.xOnlyMode) {
+            if (state.wrongWords.length === 0) {
+                wordLabel.textContent = 'No more words!';
+                infoLabel.textContent = '(No "×" words)';
+                return;
             }
 
-            // Save and download merged PDF
-            const mergedPdfBytes = await mergedPdf.save();
-            const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'merged_' + new Date().getTime() + '.pdf';
-            a.click();
-            URL.revokeObjectURL(url);
+            const randomIdx = Math.floor(Math.random() * state.wrongWords.length);
+            state.currentWordIdx = state.wrongWords[randomIdx];
+        } else {
+            const possible = state.remainingIdx.filter(idx => !state.correctWords.includes(idx));
 
-            mergeBtn.innerHTML = '✅ Complete! Merge Again';
-        } catch (error) {
-            alert('An error occurred: ' + error.message);
-            mergeBtn.innerHTML = '🔗 Merge & Download PDF';
-        } finally {
-            mergeBtn.disabled = false;
+            if (possible.length === 0) {
+                const fallback = Array.from({ length: allWords.length }, (_, i) => i)
+                    .filter(idx => !state.wrongWords.includes(idx) && !state.correctWords.includes(idx));
+
+                if (fallback.length === 0) {
+                    wordLabel.textContent = 'No more words!';
+                    infoLabel.textContent = '';
+                    return;
+                }
+
+                const randomIdx = Math.floor(Math.random() * fallback.length);
+                state.currentWordIdx = fallback[randomIdx];
+            } else {
+                const randomIdx = Math.floor(Math.random() * possible.length);
+                state.currentWordIdx = possible[randomIdx];
+            }
+        }
+
+        wordLabel.textContent = allWords[state.currentWordIdx].word;
+        infoLabel.textContent = '';
+    }
+
+    function revealInfo() {
+        const word = allWords[state.currentWordIdx];
+        const infoLabel = document.getElementById('infoLabel');
+        infoLabel.textContent = `Meaning: ${word.meaning}\nExample: ${word.example}`;
+    }
+
+    function markWrong() {
+        if (!state.wrongWords.includes(state.currentWordIdx)) {
+            state.wrongWords.push(state.currentWordIdx);
+        }
+        revealInfo();
+        saveProgress();
+    }
+
+    function markCorrect() {
+        if (!state.correctWords.includes(state.currentWordIdx)) {
+            state.correctWords.push(state.currentWordIdx);
+        }
+
+        const wrongIdx = state.wrongWords.indexOf(state.currentWordIdx);
+        if (wrongIdx !== -1) {
+            state.wrongWords.splice(wrongIdx, 1);
+        }
+
+        revealInfo();
+        saveProgress();
+    }
+
+    function resetCorrectWords() {
+        state.remainingIdx = Array.from(new Set([...state.remainingIdx, ...state.correctWords]));
+        state.correctWords = [];
+        state.xOnlyMode = false;
+        saveProgress();
+        showNextWord();
+    }
+
+    function switchPanel(panelName, xOnlyMode = false) {
+        const panels = ['homePanel', 'quizPanel', 'importPanel'];
+        panels.forEach(p => {
+            document.getElementById(p).classList.remove('active');
+        });
+
+        if (panelName === 'quiz') {
+            document.getElementById('quizPanel').classList.add('active');
+            state.xOnlyMode = xOnlyMode;
+            showNextWord();
+        } else if (panelName === 'import') {
+            document.getElementById('importPanel').classList.add('active');
+            document.getElementById('fileInput').value = '';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('sheetSelector').style.display = 'none';
+            document.getElementById('rangeSelector').classList.remove('visible');
+            document.getElementById('importBtn').style.display = 'none';
+            document.getElementById('importStatus').textContent = '';
+        } else {
+            document.getElementById('homePanel').classList.add('active');
         }
     }
+
+    document.querySelector('.upload-button').addEventListener('click', () => {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('btnStart').addEventListener('click', () => switchPanel('quiz', false));
+    document.getElementById('btnReset').addEventListener('click', resetCorrectWords);
+    document.getElementById('btnXOnly').addEventListener('click', () => switchPanel('quiz', true));
+    document.getElementById('btnImport').addEventListener('click', () => switchPanel('import'));
+    document.getElementById('btnNext').addEventListener('click', showNextWord);
+    document.getElementById('btnCorrect').addEventListener('click', markCorrect);
+    document.getElementById('btnWrong').addEventListener('click', markWrong);
+    document.getElementById('btnHome').addEventListener('click', () => switchPanel('home'));
+    document.getElementById('backBtn').addEventListener('click', () => switchPanel('home'));
+
+    loadVocabulary();
+    loadProgress();
 </script>
-```
 
 </body>
 </html>
