@@ -501,11 +501,6 @@
 
         document.getElementById('fileName').textContent = `Selected: ${file.name}`;
 
-        if (file.type.startsWith('image/')) {
-            document.getElementById('importStatus').textContent = 'Image files are not supported. Please select an Excel file (.xlsx or .xls).';
-            return;
-        }
-
         const reader = new FileReader();
         reader.onload = function (e) {
             try {
@@ -528,6 +523,11 @@
                 console.error('Error:', error);
             }
         };
+        
+        reader.onerror = function() {
+            document.getElementById('importStatus').textContent = 'Error reading file. Please try again.';
+        };
+        
         reader.readAsArrayBuffer(file);
     });
 
