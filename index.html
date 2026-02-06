@@ -376,7 +376,7 @@
                     <input 
                         type="file" 
                         id="fileInput" 
-                        accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                        accept="image/*,video/*,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                     />
                 </div>
                 <div class="file-name" id="fileName"></div>
@@ -500,6 +500,12 @@
         if (!file) return;
 
         document.getElementById('fileName').textContent = `Selected: ${file.name}`;
+
+        // Check if it's an image or video file
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+            document.getElementById('importStatus').textContent = 'Image and video files are not supported. Please select an Excel file (.xlsx or .xls).';
+            return;
+        }
 
         const reader = new FileReader();
         reader.onload = function (e) {
